@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -16,3 +17,6 @@ Route::get('/items/{id}', [ItemController::class, 'show']);
 Route::delete('/items/{id}', [ItemController::class, 'destroy']);
 
 // Transaction routes
+Route::get('/transactions', [TransactionController::class, 'index']);
+Route::get('/transactions/{id}', [TransactionController::class, 'show']);
+Route::delete('/transactions/{id}', [TransactionController::class, 'destroy']);

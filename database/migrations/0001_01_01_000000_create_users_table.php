@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('country')->nullable();
             $table->string('address')->nullable();
             $table->integer('zip_code')->nullable();
-            $table->tinyInteger('admin');
+            $table->tinyInteger('admin')->default(0);
             $table->timestamps();
         });
 
