@@ -14,20 +14,20 @@ class User extends Authenticatable
         'name',
         'username',
         'email',
-        // 'password',
         'profile_description',
         'city',
         'state',
         'country',
         'address',
         'zip_code',
-        'admin',
     ];
 
-    // protected $hidden = [
-    //     'password',
-    //     'remember_token',
-    // ];
+    protected $guarded = [
+        'id',
+        'admin',
+        'created_at',
+        'updated_at',
+    ];
 
     public function items()
     {
