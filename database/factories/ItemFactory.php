@@ -22,7 +22,7 @@ class ItemFactory extends Factory
             'price' => $this->faker->randomFloat(2, 0, 1000),
             'state' => $this->faker->randomElement(['available', 'sold', 'reserved']),
             'publish_date' => $this->faker->date(),
-            'user_id' => $this->faker->numberBetween(1, 10),
+            'user_id' => $this->faker->numberBetween(1, null) //pendiente revisar si esto funciona solo con un parametro
         ];
     }
 }

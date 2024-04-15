@@ -56,9 +56,7 @@ class UserControllerTest extends TestCase
 
         // Act
         $response = $this->postJson('/api/users', $userData);
-        if ($response->getStatusCode() !== 201) {
-            dump($response->getContent());
-        }
+
         // Assert
         $response->assertStatus(201)
             ->assertJson([
