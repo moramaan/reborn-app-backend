@@ -109,8 +109,7 @@ class UserControllerTest extends TestCase
     {
         // Create a user to update
         $user = UserFactory::new()->create();
-        $user->id = 2;
-        $user->save();
+
         $user->name = 'Updated Name';
 
         // New data for updating the user
