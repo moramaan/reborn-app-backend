@@ -22,7 +22,7 @@ Route::get('/transactions', [TransactionController::class, 'index']);
 Route::get('/transactions/{id}', [TransactionController::class, 'show']);
 Route::delete('/transactions/{id}', [TransactionController::class, 'destroy']);
 
-// Create or update routes
+// Create and update routes
 Route::middleware([VerifyJsonContentType::class])->group(function () {
     Route::post('/users', [UserController::class, 'store']);
     Route::post('/items', [ItemController::class, 'store']);

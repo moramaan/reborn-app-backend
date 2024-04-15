@@ -14,21 +14,36 @@ class UserController extends Controller
 {
     public function index()
     {
-
-        $users = User::all();
-        return response()->json($users);
+        try {
+            $users = User::all();
+            return response()->json($users);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to retrieve users', 'error' => $e->getMessage()], 500);
+        }
     }
     public function show($id)
     {
-        $user = User::find($id);
-        return response()->json($user);
+        try {
+            $user = User::findOrFail($id);
+            return response()->json($user);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'User not found'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to retrieve user', 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function destroy($id)
     {
-        $user = User::find($id);
-        $user->delete();
-        return response()->json($user);
+        try {
+            $user = User::findOrFail($id);
+            $user->delete();
+            return response()->json($user);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'User not found'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to delete user', 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function store(Request $request)
@@ -47,8 +62,6 @@ class UserController extends Controller
             ]);
 
             $user = User::create($validatedData);
-
-            $user->save();
 
             return response()->json(['message' => 'User created', 'user' => $user], 201);
         } catch (ValidationException $e) {

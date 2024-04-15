@@ -59,9 +59,7 @@ class UserControllerTest extends TestCase
 
         // Assert
         $response->assertStatus(201)
-            ->assertJson([
-                'message' => 'User created',
-            ])
+            ->assertJson(['message' => 'User created'])
             ->assertJsonStructure([
                 'message',
                 'user' => [

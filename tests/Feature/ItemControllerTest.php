@@ -13,6 +13,7 @@ class ItemControllerTest extends TestCase
     use RefreshDatabase;
     use WithFaker;
 
+    #[\PHPUnit\Framework\Attributes\Test]
     public function test_items_response_structure(): void
     {
         $response = $this->get('/api/items');

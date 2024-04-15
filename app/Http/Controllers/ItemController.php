@@ -43,8 +43,6 @@ class ItemController extends Controller
         }
     }
 
-    ## pendiente de revisar!!!
-
     public function store(Request $request)
     {
         try {
@@ -58,8 +56,6 @@ class ItemController extends Controller
             ]);
 
             $item = Item::create($validatedData);
-
-            $item->save();
 
             return response()->json(['message' => 'Item created', 'item' => $item], 201);
         } catch (ValidationException $e) {
