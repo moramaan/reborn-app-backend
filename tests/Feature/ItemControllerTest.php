@@ -171,11 +171,10 @@ class ItemControllerTest extends TestCase
                 'updated_at',
             ],
         ]);
-        // $response->assertJsonFragment(['id' => $item1->id]);
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
-    public function it_can_search_items_with_invalid_filters()
+    public function it_returns_error_when_search_with_invalid_filters()
     {
         $user = User::factory()->create();
         Item::factory(5)->create(['user_id' => $user->id]);
@@ -189,7 +188,43 @@ class ItemControllerTest extends TestCase
             ]
         ]);
 
+        $response->assertStatus(400);
+    }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function it_can_search_items_by_name()
+    {
+        $user = User::factory()->create();
+        Item::factory()->create(['user_id' => $user->id, 'name' => 'Item 1']);
+        Item::factory()->create(['user_id' => $user->id, 'name' => 'Item 2']);
+        Item::factory()->create(['user_id' => $user->id, 'name' => 'Item 3']);
+
+        $response = $this->postJson("/api/items/search", [
+            'filters' => [
+                ['column' => 'name', 'value' => 'Item 1'],
+            ]
+        ]);
+
         $response->assertOk();
-        $response->assertJsonCount(0); // No items should match the filters
+        $response->assertJsonCount(1);
+        $response->assertJsonFragment(['name' => 'Item 1']);
+    }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function it_can_search_items_by_partial_name()
+    {
+        $user = User::factory()->create();
+        Item::factory()->create(['user_id' => $user->id, 'name' => 'Item 1']);
+        Item::factory()->create(['user_id' => $user->id, 'name' => 'Item 2']);
+        Item::factory()->create(['user_id' => $user->id, 'name' => 'Item 3']);
+
+        $response = $this->postJson("/api/items/search", [
+            'filters' => [
+                ['column' => 'name', 'value' => 'Item'],
+            ]
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonCount(3);
     }
 }

@@ -33,46 +33,49 @@ class ItemController extends Controller
     public function search(Request $request)
     {
         try {
-
             $query = Item::query();
-            if ($request->has('filters')) {
-                $filters = $request->input('filters');
 
-                foreach ($filters as $filter) {
-                    if (isset($filter['column']) && isset($filter['value'])) {
-                        $column = $filter['column'];
-                        $value = $filter['value'];
+            $filters = $request->input('filters', []);
+            if (!is_array($filters)) {
+                throw new \InvalidArgumentException('Invalid filters format');
+            }
 
-                        // Handle price range filter separately
-                        if ($column === 'price') {
-                            if (isset($filter['min'])) {
-                                $query->where('price', '>=', $filter['min']);
-                            }
-                            if (isset($filter['max'])) {
-                                $query->where('price', '<=', $filter['max']);
-                            }
-                        } else {
-                            $value = $filter['value'];
+            foreach ($filters as $filter) {
+                if (isset($filter['column'], $filter['value'])) {
+                    $column = $filter['column'];
+                    $value = $filter['value'];
 
-                            if (in_array($column, app(Item::class)->getFillable())) {
-                                $query->where($column, $value);
-                            }
+                    if ($column === 'price') {
+                        if (isset($filter['min'])) {
+                            $query->where('price', '>=', $filter['min']);
                         }
+                        if (isset($filter['max'])) {
+                            $query->where('price', '<=', $filter['max']);
+                        }
+                    } elseif ($column === 'name') {
+                        $query->where('name', 'like', "%$value%");
+                    } else {
+                        if (!in_array($column, app(Item::class)->getFillable())) {
+                            throw new \InvalidArgumentException("Column '$column' is not searchable");
+                        }
+                        $query->where($column, $value);
                     }
-                    // Check for orderBy and order
-                    if (isset($filter['orderBy'])) {
-                        $orderBy = $filter['orderBy'];
-                        $order = isset($filter['order']) && strtolower($filter['order']) === 'desc' ? 'desc' : 'asc';
-                        $query->orderBy($orderBy, $order);
-                    }
+                }
+
+                if (isset($filter['orderBy'])) {
+                    $orderBy = $filter['orderBy'];
+                    $order = strtolower($filter['order'] ?? '') === 'desc' ? 'desc' : 'asc';
+                    $query->orderBy($orderBy, $order);
                 }
             }
 
             $results = $query->get()->toArray();
 
             return response()->json($results);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to search items', 'error' => $e->getMessage()], 500);
+            return response()->json(['error' => 'Failed to search items'], 500);
         }
     }
 
