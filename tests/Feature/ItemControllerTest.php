@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Item;
+use App\Models\User;
 use Database\Factories\UserFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
@@ -135,5 +136,60 @@ class ItemControllerTest extends TestCase
 
         // Assert
         $response->assertStatus(404);
+    }
+
+    // *** Dynamic filtered search tests *** //
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function it_can_search_items_with_valid_filters()
+    {
+        $user = User::factory()->create();
+        Item::factory(10)->create(['user_id' => $user->id, 'state' => 'available']);
+
+        $response = $this->postJson("/api/items/search", [
+            'filters' => [
+                ['column' => 'state', 'value' => 'available'],
+                ['orderBy' => 'publish_date', 'order' => 'asc'],
+                ['orderBy' => 'name', 'order' => 'desc'],
+                ['column' => 'price', 'min' => 10, 'max' => 100]
+            ]
+        ]);
+        if ($response->status() !== 200) {
+            dump($response->json());
+        }
+        $response->assertOk();
+        $response->assertJsonCount(10);
+        $response->assertJsonStructure([
+            '*' => [
+                'id',
+                'name',
+                'description',
+                'price',
+                'state',
+                'publish_date',
+                'user_id',
+                'created_at',
+                'updated_at',
+            ],
+        ]);
+        // $response->assertJsonFragment(['id' => $item1->id]);
+    }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function it_can_search_items_with_invalid_filters()
+    {
+        $user = User::factory()->create();
+        Item::factory(5)->create(['user_id' => $user->id]);
+
+        $response = $this->postJson("/api/items/search", [
+            'filters' => [
+                ['column' => 'state', 'value' => 'invalid_state'], // Invalid value for 'state'
+                ['column' => 'name', 'value' => 'posts'],
+                ['column' => 'created_at', 'value' => '2023-01-01'], // Invalid column
+                ['orderBy' => 'price', 'order' => 'asc']
+            ]
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonCount(0); // No items should match the filters
     }
 }

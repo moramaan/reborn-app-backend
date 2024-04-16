@@ -14,6 +14,7 @@ Route::delete('/users/{id}', [UserController::class, 'destroy']);
 // Item routes
 Route::get('/items', [ItemController::class, 'index']);
 Route::get('/items/{id}', [ItemController::class, 'show']);
+Route::post('/items/search', [ItemController::class, 'search']);
 Route::delete('/items/{id}', [ItemController::class, 'destroy']);
 
 // Transaction routes
