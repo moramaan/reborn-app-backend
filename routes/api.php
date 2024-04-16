@@ -4,7 +4,6 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\VerifyJsonContentType;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // User routes

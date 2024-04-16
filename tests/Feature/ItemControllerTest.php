@@ -51,9 +51,6 @@ class ItemControllerTest extends TestCase
 
         // Act
         $response = $this->postJson('/api/items', $itemData);
-        if ($response->getStatusCode() !== 201) {
-            dump($response->getContent());
-        }
 
         // Assert
         $response->assertStatus(201)
@@ -88,12 +85,6 @@ class ItemControllerTest extends TestCase
 
         // Act
         $response = $this->putJson("/api/items/{$item->id}", $itemData);
-        if (
-            $response->getStatusCode() !==
-            200
-        ) {
-            dump($response->getContent());
-        }
 
         // Assert
         $response->assertStatus(200);
