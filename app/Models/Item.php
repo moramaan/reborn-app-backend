@@ -14,6 +14,7 @@ class Item extends Model
         'description',
         'price',
         'state',
+        'condition',
         'publish_date',
         'user_id',
     ];

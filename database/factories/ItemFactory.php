@@ -21,8 +21,9 @@ class ItemFactory extends Factory
             'description' => $this->faker->sentence(rand(4, 10)),
             'price' => $this->faker->randomFloat(2, 0, 1000),
             'state' => $this->faker->randomElement(['available', 'sold', 'reserved']),
+            'condition' => $this->faker->numberBetween(0, 2),
             'publish_date' => $this->faker->date(),
-            'user_id' => $this->faker->numberBetween(1, null) //pendiente revisar si esto funciona solo con un parametro
+            'user_id' => $this->faker->numberBetween(1, null)
         ];
     }
 }

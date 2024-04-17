@@ -27,6 +27,7 @@ class ItemControllerTest extends TestCase
                     'description',
                     'price',
                     'state',
+                    'condition',
                     'publish_date',
                     'user_id',
                     'created_at',
@@ -46,6 +47,7 @@ class ItemControllerTest extends TestCase
             'description' => $this->faker->sentence(rand(4, 10)),
             'price' => $this->faker->randomFloat(2, 0, 1000),
             'state' => $this->faker->randomElement(['available', 'sold', 'reserved']),
+            'condition' => $this->faker->numberBetween(0, 2),
             'publish_date' => $this->faker->date(),
             'user_id' => $user->id,
         ];
@@ -65,6 +67,7 @@ class ItemControllerTest extends TestCase
                     'description',
                     'price',
                     'state',
+                    'condition',
                     'publish_date',
                     'user_id',
                     'created_at',
@@ -89,7 +92,6 @@ class ItemControllerTest extends TestCase
 
         // Assert
         $response->assertStatus(200);
-        // ->assertJson($itemData);
 
         $this->assertDatabaseHas('items', $itemData);
     }
@@ -103,6 +105,7 @@ class ItemControllerTest extends TestCase
             'description' => 'description',
             'price' => 'invalidprice',
             'state' => 'invalidstate',
+            'condition' => 33,
             'publish_date' => 'invalidpublish_date',
             'user_id' => 'invaliduser_id',
         ];
@@ -115,6 +118,7 @@ class ItemControllerTest extends TestCase
             ->assertJsonValidationErrors([
                 'price',
                 'state',
+                'condition',
                 'publish_date',
                 'user_id',
             ]);
@@ -143,14 +147,15 @@ class ItemControllerTest extends TestCase
     public function it_can_search_items_with_valid_filters()
     {
         $user = User::factory()->create();
-        Item::factory(10)->create(['user_id' => $user->id, 'state' => 'available']);
+        Item::factory(10)->create(['user_id' => $user->id, 'state' => 'available', 'condition' => 1]);
 
         $response = $this->postJson("/api/items/search", [
             'filters' => [
                 ['column' => 'state', 'value' => 'available'],
                 ['orderBy' => 'publish_date', 'order' => 'asc'],
                 ['orderBy' => 'name', 'order' => 'desc'],
-                ['column' => 'price', 'min' => 10, 'max' => 100]
+                ['column' => 'price', 'min' => 10, 'max' => 100],
+                ['column' => 'condition', 'value' => 1],
             ]
         ]);
         if ($response->status() !== 200) {
@@ -165,6 +170,7 @@ class ItemControllerTest extends TestCase
                 'description',
                 'price',
                 'state',
+                'condition',
                 'publish_date',
                 'user_id',
                 'created_at',
@@ -184,7 +190,8 @@ class ItemControllerTest extends TestCase
                 ['column' => 'state', 'value' => 'invalid_state'], // Invalid value for 'state'
                 ['column' => 'name', 'value' => 'posts'],
                 ['column' => 'created_at', 'value' => '2023-01-01'], // Invalid column
-                ['orderBy' => 'price', 'order' => 'asc']
+                ['orderBy' => 'price', 'order' => 'asc'],
+                ['column' => 'condition', 'value' => 5], // Invalid value
             ]
         ]);
 

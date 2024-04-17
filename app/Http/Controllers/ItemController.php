@@ -100,6 +100,7 @@ class ItemController extends Controller
                 'description' => 'required|string|min:4|max:255',
                 'price' => 'required|numeric|min:0',
                 'state' => 'nullable|in:available,sold,reserved',
+                'condition' => 'required|int|min:0|max:2',
                 'publish_date' => 'required|date',
                 'user_id' => 'required|int|min:1',
             ]);
@@ -128,6 +129,7 @@ class ItemController extends Controller
                 'description' => 'required|string|min:4|max:255',
                 'price' => 'required|numeric|min:0',
                 'state' => 'nullable|in:available,sold,reserved',
+                'condition' => 'required|int|min:0|max:2',
                 'publish_date' => 'required|date',
                 'user_id' => 'required|int|min:1',
             ]);

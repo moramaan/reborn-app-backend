@@ -19,6 +19,7 @@ return new class extends Migration
             $table->text('description');
             $table->float('price');
             $table->enum('state', ['available', 'sold', 'reserved'])->default('available');
+            $table->tinyInteger('condition')->unsigned();
             $table->date('publish_date');
             $table->timestamps();
         });
