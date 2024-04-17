@@ -2,14 +2,20 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Transaction extends Model
 {
     use HasFactory;
+    use HasUuids;
+
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
+        // 'id',
         'item_id',
         'buyer_id',
         'seller_id',
@@ -17,9 +23,20 @@ class Transaction extends Model
         'transaction_date',
     ];
 
+    protected $guarded = [
+        'id',
+        'admin',
+        'created_at',
+        'updated_at',
+    ];
+
+    // protected $casts = [
+    //     'transaction_date' => 'datetime:Y-m-d',
+    // ];
+
     public function item()
     {
-        return $this->belongsTo(Item::class);
+        return $this->belongsTo(Item::class, 'item_id');
     }
 
     public function buyer()

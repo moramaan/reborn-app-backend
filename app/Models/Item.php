@@ -14,6 +14,7 @@ class Item extends Model
         'description',
         'price',
         'state',
+        'condition',
         'publish_date',
         'user_id',
     ];
@@ -23,8 +24,8 @@ class Item extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function transactions()
+    public function transaction()
     {
-        return $this->hasMany(Transaction::class);
+        return $this->hasOne(Transaction::class);
     }
 }

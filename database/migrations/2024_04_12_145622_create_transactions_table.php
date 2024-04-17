@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->unsignedBigInteger('item_id');
+            $table->unsignedBigInteger('item_id')->unique();
             $table->unsignedBigInteger('buyer_id');
             $table->unsignedBigInteger('seller_id');
             $table->float('price');
