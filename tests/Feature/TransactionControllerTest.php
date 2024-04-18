@@ -127,63 +127,19 @@ class TransactionControllerTest extends TestCase
             ]);
     }
 
-    // *** update transaction tests *** /
+    // *** update transaction test *** /
     #[\PHPUnit\Framework\Attributes\Test]
-    public function it_updates_a_transaction()
+    public function it_returns_error_trying_to_update_a_transaction()
     {
         $transaction = TransactionFactory::new()->create();
-
-        $transaction->price = $this->faker->randomFloat(2, 0, 1000);
         $transactionData = $transaction->toArray();
 
         // Act
         $response = $this->putJson("/api/transactions/{$transaction->id}", $transactionData);
-        
-        // Assert
-        $response->assertStatus(200);
-
-        $this->assertDatabaseHas('transactions', $transactionData);
-    }
-
-    #[\PHPUnit\Framework\Attributes\Test]
-    public function it_returns_an_error_when_updating_a_transaction_with_invalid_data()
-    {
-        $transaction = TransactionFactory::new()->create();
-
-        $transactionData = [
-            'item_id' => 'xxx',
-            'buyer_id' => 'xxx',
-            'seller_id' => 'xxx',
-            'price' => 'xxx',
-            'transaction_date' => 'xxx',
-        ];
-
-        // Act
-        $response = $this->putJson("/api/transactions/{$transaction->id}", $transactionData);
 
         // Assert
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors([
-                'item_id',
-                'buyer_id',
-                'seller_id',
-                'price',
-                'transaction_date',
-            ]);
-    }
-
-
-    #[\PHPUnit\Framework\Attributes\Test]
-    public function it_returns_an_error_when_updating_a_non_existent_transaction()
-    {
-        // Act
-        $response = $this->putJson('/api/transactions/999', []);
-
-        // Assert
-        $response->assertStatus(404)
-            ->assertJson([
-                'error' => 'Transaction not found',
-            ]);
+        $response->assertStatus(405)
+            ->assertJson(['error' => 'Method not allowed']);
     }
 
     // *** delete transaction tests *** /
