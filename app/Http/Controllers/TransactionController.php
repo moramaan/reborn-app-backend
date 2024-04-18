@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Item;
 use App\Models\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -57,11 +58,22 @@ class TransactionController extends Controller
                 'transaction_date' => 'required|date',
             ]);
 
+            if ($validatedData['buyer_id'] === $validatedData['seller_id']) {
+                throw new \InvalidArgumentException('Buyer and seller cannot be the same user');
+            }
+            
+            $item = Item::find($validatedData['item_id']);
+            if ($item->state === 'sold') {
+                throw new \InvalidArgumentException('Item is already sold');
+            }
+
             $validatedData['id'] = (string) Str::uuid();
 
             $transaction = Transaction::create($validatedData);
 
             return response()->json(['message' => 'Transaction created', 'transaction' => $transaction], 201);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
         } catch (ValidationException $e) {
             return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
