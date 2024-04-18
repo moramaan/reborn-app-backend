@@ -34,6 +34,8 @@ class ItemControllerTest extends TestCase
                     'updated_at',
                 ],
             ]);
+        // list can't contain sold items
+        $response->assertJsonMissing(['state' => 'sold']);
     }
 
     // *** store item tests *** /
@@ -46,7 +48,7 @@ class ItemControllerTest extends TestCase
             'name' => $this->faker->name(),
             'description' => $this->faker->sentence(rand(4, 10)),
             'price' => $this->faker->randomFloat(2, 0, 1000),
-            'state' => $this->faker->randomElement(['available', 'sold', 'reserved']),
+            'state' => $this->faker->randomElement(['available', 'reserved']),
             'condition' => $this->faker->numberBetween(0, 2),
             'publish_date' => $this->faker->date(),
             'user_id' => $user->id,
@@ -74,6 +76,7 @@ class ItemControllerTest extends TestCase
                     'updated_at',
                 ],
             ]);
+        $response->assertJsonMissing(['state' => 'sold']);
     }
 
     // *** update item tests *** /
@@ -94,6 +97,24 @@ class ItemControllerTest extends TestCase
         $response->assertStatus(200);
 
         $this->assertDatabaseHas('items', $itemData);
+    }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function it_returns_error_trying_to_update_sold_item()
+    {
+        $user = UserFactory::new()->create();
+        $item = Item::factory()->create(['user_id' => $user->id, 'state' => 'sold']);
+
+        $item->name = 'updated name';
+        $item->description = 'updated description';
+        $itemData = $item->toArray();
+
+        // Act
+        $response = $this->putJson("/api/items/{$item->id}", $itemData);
+
+        // Assert
+        $response->assertStatus(400);
+        $response->assertJson(['error' => 'Sold items cannot be updated']);
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
@@ -128,7 +149,7 @@ class ItemControllerTest extends TestCase
     public function it_returns_error_when_item_not_found()
     {
         $user = UserFactory::new()->create();
-        
+
         // Arrange
         $item = Item::factory()->create(['user_id' => $user->id]);
 

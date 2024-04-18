@@ -28,4 +28,16 @@ class Item extends Model
     {
         return $this->hasOne(Transaction::class);
     }
+
+    // Get only the items that are available or reserved
+    public static function listAvailableItems()
+    {
+        return Item::whereIn('state', ['available', 'reserved'])->get();
+    }
+
+    // Items can only be updated if they are not sold
+    public function canBeUpdated()
+    {
+        return $this->state !== 'sold';
+    }
 }

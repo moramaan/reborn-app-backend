@@ -50,7 +50,7 @@ class TransactionController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                'item_id' => 'required|int|min:1',
+                'item_id' => 'required|int|min:1|exists:items,id',
                 'buyer_id' => 'required|int|min:1|exists:users,id',
                 'seller_id' => 'required|int|min:1|exists:users,id',
                 'price' => 'required|numeric|min:0',
