@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Database\Factories\ItemFactory;
 use Database\Factories\TransactionFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
@@ -59,7 +60,7 @@ class TransactionControllerTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
-    public function it_returns_an_error_when_creating_an_invalid_transaction()
+    public function it_returns_an_error_creating_an_invalid_transaction()
     {
         // Act
         $response = $this->postJson('/api/transactions', []);
@@ -76,7 +77,7 @@ class TransactionControllerTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
-    public function it_returns_an_error_when_creating_a_transaction_with_invalid_data()
+    public function it_returns_an_error_creating_a_transaction_with_invalid_data()
     {
         $transactionData = [
             'item_id' => 'xxx',
@@ -98,6 +99,21 @@ class TransactionControllerTest extends TestCase
                 'price',
                 'transaction_date',
             ]);
+    }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function it_returns_an_error_creating_a_transaction_with_an_already_sold_item()
+    {
+        $transactionData = TransactionFactory::new()->make()->toArray();
+        $item = ItemFactory::new()->create(['state' => 'sold', 'user_id' => $transactionData['seller_id']]);
+        $transactionData['item_id'] = $item->id;
+
+        // Act
+        $response = $this->postJson('/api/transactions', $transactionData);
+
+        // Assert
+        $response->assertStatus(400)
+            ->assertJson(['error' => 'Item is already sold']);
     }
 
     // *** show transaction tests *** /
@@ -147,7 +163,7 @@ class TransactionControllerTest extends TestCase
     public function it_deletes_a_transaction()
     {
         $transaction = TransactionFactory::new()->create();
-        
+
         // Act
         $response = $this->delete("/api/transactions/{$transaction->id}");
 

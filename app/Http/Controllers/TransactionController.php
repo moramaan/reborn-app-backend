@@ -58,10 +58,6 @@ class TransactionController extends Controller
                 'transaction_date' => 'required|date',
             ]);
 
-            if ($validatedData['buyer_id'] === $validatedData['seller_id']) {
-                throw new \InvalidArgumentException('Buyer and seller cannot be the same user');
-            }
-            
             $item = Item::find($validatedData['item_id']);
             if ($item->state === 'sold') {
                 throw new \InvalidArgumentException('Item is already sold');
