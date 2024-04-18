@@ -20,7 +20,7 @@ class ItemFactory extends Factory
             'name' => $this->faker->name(),
             'description' => $this->faker->sentence(rand(4, 10)),
             'price' => $this->faker->randomFloat(2, 0, 1000),
-            'state' => $this->faker->randomElement(['available', 'sold', 'reserved']),
+            'state' => $this->faker->randomElement(['available', 'reserved']),
             'condition' => $this->faker->numberBetween(0, 2),
             'publish_date' => $this->faker->date(),
             'user_id' => $this->faker->numberBetween(1, null)

@@ -14,7 +14,7 @@ class ItemController extends Controller
 {
     public function index()
     {
-        $items = Item::all();
+        $items = Item::listAvailableItems();
         return response()->json($items);
     }
 
@@ -58,6 +58,9 @@ class ItemController extends Controller
                         if (!in_array($column, app(Item::class)->getFillable())) {
                             throw new \InvalidArgumentException("Column '$column' is not searchable");
                         }
+                        if ($column === 'state' && $value === 'sold') {
+                            throw new \InvalidArgumentException("Column '$column' cannot be used to search for sold items");
+                        } 
                         $query->where($column, $value);
                     }
                 }
@@ -99,10 +102,10 @@ class ItemController extends Controller
                 'name' => 'required|string|min:4|max:255',
                 'description' => 'required|string|min:4|max:255',
                 'price' => 'required|numeric|min:0',
-                'state' => 'nullable|in:available,sold,reserved',
+                'state' => 'nullable|in:available,reserved', // create items as sold don't make sense
                 'condition' => 'required|int|min:0|max:2',
                 'publish_date' => 'required|date',
-                'user_id' => 'required|int|min:1',
+                'user_id' => 'required|int|min:1|exists:users,id',
             ]);
 
             $item = Item::create($validatedData);
@@ -124,6 +127,10 @@ class ItemController extends Controller
 
             $item = Item::findOrFail($id);
 
+            if (!$item->canBeUpdated()) {
+                return response()->json(['error' => 'Sold items cannot be updated'], 400);
+            }
+
             $validatedData = $request->validate([
                 'name' => 'required|string|min:4|max:255',
                 'description' => 'required|string|min:4|max:255',
@@ -131,7 +138,7 @@ class ItemController extends Controller
                 'state' => 'nullable|in:available,sold,reserved',
                 'condition' => 'required|int|min:0|max:2',
                 'publish_date' => 'required|date',
-                'user_id' => 'required|int|min:1',
+                'user_id' => 'required|int|min:1|exists:users,id',
             ]);
 
             $item->update($validatedData);
