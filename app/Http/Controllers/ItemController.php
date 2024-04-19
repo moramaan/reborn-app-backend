@@ -33,7 +33,7 @@ class ItemController extends Controller
     public function search(Request $request)
     {
         try {
-            $query = Item::query();
+            $query = Item::query()->whereNot('state', 'sold');
 
             $filters = $request->input('filters', []);
             if (!is_array($filters)) {
