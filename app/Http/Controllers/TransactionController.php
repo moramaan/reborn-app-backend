@@ -54,6 +54,10 @@ class TransactionController extends Controller
 
             $transaction = Transaction::create($validatedData);
 
+            // Update item state to sold
+            $item->state = 'sold';
+            $item->save();
+
             return response()->json(['message' => 'Transaction created', 'transaction' => $transaction], 201);
         } catch (\InvalidArgumentException $e) {
             return response()->json(['error' => $e->getMessage()], 400);
