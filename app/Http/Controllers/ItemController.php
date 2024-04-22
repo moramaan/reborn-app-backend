@@ -86,6 +86,10 @@ class ItemController extends Controller
     {
         try {
             $item = Item::findOrFail($id);
+            // check first if the item is sold or is related to a transaction
+            if ($item->state === 'sold' || $item->transaction()->exists()) {
+                return response()->json(['error' => 'Cannot delete sold items'], 400);
+            }
             $item->delete();
             return response()->json($item);
         } catch (ModelNotFoundException $e) {

@@ -34,19 +34,6 @@ class TransactionController extends Controller
         }
     }
 
-    public function destroy($id)
-    {
-        try {
-            $transaction = Transaction::findOrFail($id);
-            $transaction->delete();
-            return response()->json($transaction);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'Transaction not found', 'error-message' => $e->getMessage()], 404);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Failed to delete transaction', 'error' => $e->getMessage()], 500);
-        }
-    }
-
     public function store(Request $request)
     {
         try {

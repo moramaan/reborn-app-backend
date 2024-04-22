@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
@@ -15,7 +16,8 @@ class UserController extends Controller
     public function index()
     {
         try {
-            $users = User::all();
+            // $users = User::all();
+            $users = User::active()->get();
             return response()->json($users);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Failed to retrieve users', 'error' => $e->getMessage()], 500);
@@ -37,7 +39,13 @@ class UserController extends Controller
     {
         try {
             $user = User::findOrFail($id);
-            $user->delete();
+            // flag user as deleted
+            $user->is_deleted = true;
+            $user->save();
+            // delete unsold items of this user
+            DB::transaction(function () use ($user) {
+                $user->unsoldItems()->delete();
+            }, 5);
             return response()->json($user);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'User not found'], 404);
