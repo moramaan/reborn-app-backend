@@ -24,7 +24,8 @@ class User extends Authenticatable
 
     protected $guarded = [
         'id',
-        'admin',
+        'is_admin',
+        'is_deleted',
         'created_at',
         'updated_at',
     ];
@@ -49,8 +50,10 @@ class User extends Authenticatable
         return $this->transactionsAsBuyer->merge($this->transactionsAsSeller);
     }
 
-    public function isAdmin()
+    //items of the user that are not sold, i.e. items that are not part of any transaction
+    public function unsoldItems()
     {
-        return $this->admin;
+        return $this->items()->whereNotIn('id', $this->transactionsAsSeller()->pluck('item_id'));
     }
+
 }

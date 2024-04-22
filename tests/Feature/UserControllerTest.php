@@ -30,7 +30,8 @@ class UserControllerTest extends TestCase
                     'country',
                     'address',
                     'zip_code',
-                    'admin',
+                    'is_admin',
+                    'is_deleted',
                     'created_at',
                     'updated_at',
                 ],
@@ -150,5 +151,33 @@ class UserControllerTest extends TestCase
         // Assert: Check if the response indicates validation failure (HTTP 422) and contains validation errors
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['name', 'email']);
+    }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function it_deletes_an_existing_user()
+    {
+        $user = User::factory()->create();
+
+        $response = $this->deleteJson('/api/users/' . $user->id);
+
+        $response->assertStatus(200);
+
+        //assert that user is flagged as deleted in the database
+        $this->assertDatabaseHas('users', ['id' => $user->id, 'is_deleted' => true]);
+    }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function it_deletes_users_unsold_items_when_user_is_deleted()
+    {
+        $user = User::factory()->hasItems(3)->create();
+
+        $response = $this->deleteJson('/api/users/' . $user->id);
+
+        $response->assertStatus(200);
+
+        //assert that user is flagged as deleted in the database
+        $this->assertDatabaseHas('users', ['id' => $user->id, 'is_deleted' => true]);
+        //assert that user's unsold items are deleted
+        $this->assertCount(0, $user->unsoldItems()->get());
     }
 }

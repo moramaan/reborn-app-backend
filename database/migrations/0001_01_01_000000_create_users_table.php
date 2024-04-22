@@ -25,7 +25,8 @@ return new class extends Migration
             $table->string('country')->nullable();
             $table->string('address')->nullable();
             $table->integer('zip_code')->nullable();
-            $table->tinyInteger('admin')->default(0);
+            $table->boolean('is_admin')->default(false);
+            $table->boolean('is_deleted')->default(false);
             $table->timestamps();
         });
 
@@ -51,7 +52,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
-        Schema::dropIfExists('sessions');
+        // Schema::dropIfExists('password_reset_tokens');
+        // Schema::dropIfExists('sessions');
     }
 };
