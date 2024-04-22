@@ -5,6 +5,7 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\VerifyJsonContentType;
 use Illuminate\Support\Facades\Route;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 
 // Handle requests to non-existent routes
 Route::fallback(function () {
@@ -25,8 +26,10 @@ Route::delete('/items/{id}', [ItemController::class, 'destroy']);
 // Transaction routes
 Route::get('/transactions', [TransactionController::class, 'index']);
 Route::get('/transactions/{id}', [TransactionController::class, 'show']);
-Route::delete('/transactions/{id}', [TransactionController::class, 'destroy']);
-Route::put('/transactions/{id}', function(){
+Route::delete('/transactions/{id}', function () {
+    return response()->json(['error' => 'Method not allowed'], 405);
+});
+Route::put('/transactions/{id}', function () {
     return response()->json(['error' => 'Method not allowed'], 405);
 });
 

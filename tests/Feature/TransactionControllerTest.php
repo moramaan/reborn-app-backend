@@ -160,28 +160,15 @@ class TransactionControllerTest extends TestCase
 
     // *** delete transaction tests *** /
     #[\PHPUnit\Framework\Attributes\Test]
-    public function it_deletes_a_transaction()
-    {
-        $transaction = TransactionFactory::new()->create();
-
-        // Act
-        $response = $this->delete("/api/transactions/{$transaction->id}");
-
-        // Assert
-        $response->assertStatus(200)
-            ->assertJson($transaction->toArray());
-    }
-
-    #[\PHPUnit\Framework\Attributes\Test]
-    public function it_returns_an_error_when_deleting_a_non_existent_transaction()
+    public function it_returns_an_error_deleting_a_transaction()
     {
         // Act
         $response = $this->delete('/api/transactions/999');
 
         // Assert
-        $response->assertStatus(404)
+        $response->assertStatus(405)
             ->assertJson([
-                'error' => 'Transaction not found',
+                'error' => 'Method not allowed',
             ]);
     }
 }
