@@ -15,6 +15,8 @@ class UserControllerTest extends TestCase
 
     public function test_users_response_structure(): void
     {
+        UserFactory::new()->count(5)->create();
+
         $response = $this->get('/api/users');
 
         $response->assertStatus(200)
@@ -36,6 +38,9 @@ class UserControllerTest extends TestCase
                     'updated_at',
                 ],
             ]);
+        //assert that only active users are returned, is_deleted = false
+        $response->assertJsonMissing(['is_deleted' => true]);
+
     }
 
     // *** store user tests *** /

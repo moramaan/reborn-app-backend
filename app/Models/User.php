@@ -56,4 +56,10 @@ class User extends Authenticatable
         return $this->items()->whereNotIn('id', $this->transactionsAsSeller()->pluck('item_id'));
     }
 
+    //list only users that are not flagged as deleted
+    public function scopeActive($query)
+    {
+        return $query->where('is_deleted', false);
+    }
+
 }

@@ -16,7 +16,8 @@ class UserController extends Controller
     public function index()
     {
         try {
-            $users = User::all();
+            // $users = User::all();
+            $users = User::active()->get();
             return response()->json($users);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Failed to retrieve users', 'error' => $e->getMessage()], 500);
