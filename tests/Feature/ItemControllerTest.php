@@ -8,6 +8,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Str;
 
 class ItemControllerTest extends TestCase
 {
@@ -23,13 +24,15 @@ class ItemControllerTest extends TestCase
             ->assertJsonStructure([
                 '*' => [
                     'id',
-                    'name',
+                    'title',
                     'description',
                     'price',
+                    'location',
                     'state',
                     'condition',
-                    'publish_date',
-                    'user_id',
+                    'publishDate',
+                    'images',
+                    'userId',
                     'created_at',
                     'updated_at',
                 ],
@@ -45,13 +48,13 @@ class ItemControllerTest extends TestCase
         $user = UserFactory::new()->create();
 
         $itemData = [
-            'name' => $this->faker->name(),
+            'title' => $this->faker->name(),
             'description' => $this->faker->sentence(rand(4, 10)),
             'price' => $this->faker->randomFloat(2, 0, 1000),
             'state' => $this->faker->randomElement(['available', 'reserved']),
             'condition' => $this->faker->numberBetween(0, 2),
-            'publish_date' => $this->faker->date(),
-            'user_id' => $user->id,
+            'publishDate' => $this->faker->date(),
+            'userId' => $user->id,
         ];
 
         // Act
@@ -65,13 +68,13 @@ class ItemControllerTest extends TestCase
             ->assertJsonStructure([
                 'item' => [
                     'id',
-                    'name',
+                    'title',
                     'description',
                     'price',
                     'state',
                     'condition',
-                    'publish_date',
-                    'user_id',
+                    'publishDate',
+                    'userId',
                     'created_at',
                     'updated_at',
                 ],
@@ -84,9 +87,9 @@ class ItemControllerTest extends TestCase
     public function it_updates_an_item()
     {
         $user = UserFactory::new()->create();
-        $item = Item::factory()->create(['user_id' => $user->id]);
+        $item = Item::factory()->create(['userId' => $user->id]);
 
-        $item->name = 'updated name';
+        $item->title = 'updated title';
         $item->description = 'updated description';
         $itemData = $item->toArray();
 
@@ -103,9 +106,9 @@ class ItemControllerTest extends TestCase
     public function it_returns_error_trying_to_update_sold_item()
     {
         $user = UserFactory::new()->create();
-        $item = Item::factory()->create(['user_id' => $user->id, 'state' => 'sold']);
+        $item = Item::factory()->create(['userId' => $user->id, 'state' => 'sold']);
 
-        $item->name = 'updated name';
+        $item->title = 'updated title';
         $item->description = 'updated description';
         $itemData = $item->toArray();
 
@@ -122,13 +125,13 @@ class ItemControllerTest extends TestCase
     {
         // Arrange
         $invalidData = [
-            'name' => 'John',
+            'title' => 'John',
             'description' => 'description',
             'price' => 'invalidprice',
             'state' => 'invalidstate',
             'condition' => 33,
-            'publish_date' => 'invalidpublish_date',
-            'user_id' => 'invaliduser_id',
+            'publishDate' => 'invalidpublishDate',
+            'userId' => 'invaliduserId',
         ];
 
         // Act
@@ -140,8 +143,8 @@ class ItemControllerTest extends TestCase
                 'price',
                 'state',
                 'condition',
-                'publish_date',
-                'user_id',
+                'publishDate',
+                'userId',
             ]);
     }
 
@@ -151,9 +154,9 @@ class ItemControllerTest extends TestCase
         $user = UserFactory::new()->create();
 
         // Arrange
-        $item = Item::factory()->create(['user_id' => $user->id]);
+        $item = Item::factory()->create(['userId' => $user->id]);
 
-        $item->id = 33;
+        $item->id = (string) Str::uuid();
         $itemData = $item->toArray();
 
         // Act
@@ -168,13 +171,13 @@ class ItemControllerTest extends TestCase
     public function it_can_search_items_with_valid_filters()
     {
         $user = User::factory()->create();
-        Item::factory(10)->create(['user_id' => $user->id, 'state' => 'available', 'condition' => 1]);
+        Item::factory(10)->create(['userId' => $user->id, 'state' => 'available', 'condition' => 1]);
 
         $response = $this->postJson("/api/items/search", [
             'filters' => [
                 ['column' => 'state', 'value' => 'available'],
-                ['orderBy' => 'publish_date', 'order' => 'asc'],
-                ['orderBy' => 'name', 'order' => 'desc'],
+                ['orderBy' => 'publishDate', 'order' => 'asc'],
+                ['orderBy' => 'title', 'order' => 'desc'],
                 ['column' => 'price', 'min' => 10, 'max' => 100],
                 ['column' => 'condition', 'value' => 1],
             ]
@@ -187,13 +190,13 @@ class ItemControllerTest extends TestCase
         $response->assertJsonStructure([
             '*' => [
                 'id',
-                'name',
+                'title',
                 'description',
                 'price',
                 'state',
                 'condition',
-                'publish_date',
-                'user_id',
+                'publishDate',
+                'userId',
                 'created_at',
                 'updated_at',
             ],
@@ -204,12 +207,12 @@ class ItemControllerTest extends TestCase
     public function it_returns_error_when_search_with_invalid_filters()
     {
         $user = User::factory()->create();
-        Item::factory(5)->create(['user_id' => $user->id]);
+        Item::factory(5)->create(['userId' => $user->id]);
 
         $response = $this->postJson("/api/items/search", [
             'filters' => [
                 ['column' => 'state', 'value' => 'invalid_state'], // Invalid value for 'state'
-                ['column' => 'name', 'value' => 'posts'],
+                ['column' => 'title', 'value' => 'posts'],
                 ['column' => 'created_at', 'value' => '2023-01-01'], // Invalid column
                 ['orderBy' => 'price', 'order' => 'asc'],
                 ['column' => 'condition', 'value' => 5], // Invalid value
@@ -223,32 +226,32 @@ class ItemControllerTest extends TestCase
     public function it_can_search_items_by_name()
     {
         $user = User::factory()->create();
-        Item::factory()->create(['user_id' => $user->id, 'name' => 'Item 1']);
-        Item::factory()->create(['user_id' => $user->id, 'name' => 'Item 2']);
-        Item::factory()->create(['user_id' => $user->id, 'name' => 'Item 3']);
+        Item::factory()->create(['userId' => $user->id, 'title' => 'Item 1']);
+        Item::factory()->create(['userId' => $user->id, 'title' => 'Item 2']);
+        Item::factory()->create(['userId' => $user->id, 'title' => 'Item 3']);
 
         $response = $this->postJson("/api/items/search", [
             'filters' => [
-                ['column' => 'name', 'value' => 'Item 1'],
+                ['column' => 'title', 'value' => 'Item 1'],
             ]
         ]);
 
         $response->assertOk();
         $response->assertJsonCount(1);
-        $response->assertJsonFragment(['name' => 'Item 1']);
+        $response->assertJsonFragment(['title' => 'Item 1']);
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_search_items_by_partial_name()
     {
         $user = User::factory()->create();
-        Item::factory()->create(['user_id' => $user->id, 'name' => 'Item 1']);
-        Item::factory()->create(['user_id' => $user->id, 'name' => 'Item 2']);
-        Item::factory()->create(['user_id' => $user->id, 'name' => 'Item 3']);
+        Item::factory()->create(['userId' => $user->id, 'title' => 'Item 1']);
+        Item::factory()->create(['userId' => $user->id, 'title' => 'Item 2']);
+        Item::factory()->create(['userId' => $user->id, 'title' => 'Item 3']);
 
         $response = $this->postJson("/api/items/search", [
             'filters' => [
-                ['column' => 'name', 'value' => 'Item'],
+                ['column' => 'title', 'value' => 'Item'],
             ]
         ]);
 

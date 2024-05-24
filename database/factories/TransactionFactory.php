@@ -19,7 +19,7 @@ class TransactionFactory extends Factory
     {
         $buyer = UserFactory::new()->create();
         $seller = UserFactory::new()->create();
-        $item = ItemFactory::new()->create(['user_id' => $seller->id]);
+        $item = ItemFactory::new()->create(['userId' => $seller->id]);
         return [
             'id' => (string) Str::uuid(),
             'item_id' => $item->id,

@@ -105,7 +105,7 @@ class TransactionControllerTest extends TestCase
     public function it_returns_an_error_creating_a_transaction_with_an_already_sold_item()
     {
         $transactionData = TransactionFactory::new()->make()->toArray();
-        $item = ItemFactory::new()->create(['state' => 'sold', 'user_id' => $transactionData['seller_id']]);
+        $item = ItemFactory::new()->create(['state' => 'sold', 'userId' => $transactionData['seller_id']]);
         $transactionData['item_id'] = $item->id;
 
         // Act

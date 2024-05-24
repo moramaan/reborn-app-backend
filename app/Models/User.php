@@ -12,27 +12,29 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
-        'username',
+        'lastName',
         'email',
-        'profile_description',
+        'phone',
+        'showPhone',
+        'profileDescription',
         'city',
         'state',
         'country',
         'address',
-        'zip_code',
+        'zipCode',
     ];
 
     protected $guarded = [
         'id',
-        'is_admin',
-        'is_deleted',
+        'isAdmin',
+        'isDeleted',
         'created_at',
         'updated_at',
     ];
 
     public function items()
     {
-        return $this->hasMany(Item::class);
+        return $this->hasMany(Item::class, 'userId', 'id');
     }
 
     public function transactionsAsBuyer()
@@ -59,7 +61,7 @@ class User extends Authenticatable
     //list only users that are not flagged as deleted
     public function scopeActive($query)
     {
-        return $query->where('is_deleted', false);
+        return $query->where('isDeleted', false);
     }
 
 }

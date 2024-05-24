@@ -2,26 +2,37 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Item extends Model
 {
     use HasFactory;
+    use HasUuids;
+
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
-        'name',
+        'userId',
+        'title',
         'description',
         'price',
+        'location',
         'state',
         'condition',
-        'publish_date',
-        'user_id',
+        'publishDate',
+        'images',
+    ];
+
+    protected $casts = [
+        'images' => 'array', // Cast images column to array
     ];
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'userId', 'id');
     }
 
     public function transaction()

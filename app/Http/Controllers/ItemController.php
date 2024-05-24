@@ -52,8 +52,8 @@ class ItemController extends Controller
                         if (isset($filter['max'])) {
                             $query->where('price', '<=', $filter['max']);
                         }
-                    } elseif ($column === 'name') {
-                        $query->where('name', 'like', "%$value%");
+                    } elseif ($column === 'title') {
+                        $query->where('title', 'like', "%$value%");
                     } else {
                         if (!in_array($column, app(Item::class)->getFillable())) {
                             throw new \InvalidArgumentException("Column '$column' is not searchable");
@@ -103,13 +103,15 @@ class ItemController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                'name' => 'required|string|min:4|max:255',
+                'title' => 'required|string|min:4|max:255',
                 'description' => 'required|string|min:4|max:255',
                 'price' => 'required|numeric|min:0',
+                'location' => 'nullable|string|max:255', // location is optional
                 'state' => 'nullable|in:available,reserved', // create items as sold don't make sense
                 'condition' => 'required|int|min:0|max:2',
-                'publish_date' => 'required|date',
-                'user_id' => 'required|int|min:1|exists:users,id',
+                'publishDate' => 'required|date',
+                'userId' => 'required|int|min:1|exists:users,id',
+                'images' => 'nullable|array',
             ]);
 
             $item = Item::create($validatedData);
@@ -125,7 +127,7 @@ class ItemController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            if (!is_numeric($id)) {
+            if (!preg_match('/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/', $id)) {
                 return response()->json(['error' => 'Invalid item id'], 400);
             }
 
@@ -136,13 +138,15 @@ class ItemController extends Controller
             }
 
             $validatedData = $request->validate([
-                'name' => 'required|string|min:4|max:255',
+                'title' => 'required|string|min:4|max:255',
                 'description' => 'required|string|min:4|max:255',
                 'price' => 'required|numeric|min:0',
                 'state' => 'nullable|in:available,sold,reserved',
+                'location' => 'nullable|string|max:255',
                 'condition' => 'required|int|min:0|max:2',
-                'publish_date' => 'required|date',
-                'user_id' => 'required|int|min:1|exists:users,id',
+                'publishDate' => 'required|date',
+                'userId' => 'required|int|min:1|exists:users,id',
+                'images' => 'nullable|array',
             ]);
 
             $item->update($validatedData);
