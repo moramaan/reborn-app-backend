@@ -25,14 +25,16 @@ class UserFactory extends Factory
     {
         return [
             'name' => $this->faker->name(),
-            'username' => $this->faker->unique()->regexify('[a-zA-Z0-9]{4,20}'),
+            'lastName' => $this->faker->unique()->regexify('[a-zA-Z0-9]{4,20}'),
             'email' => $this->faker->unique()->safeEmail(),
-            'profile_description' => $this->faker->sentence(rand(4, 10)),
+            'phone' => $this->faker->phoneNumber,
+            'showPhone' => $this->faker->boolean,
+            'profileDescription' => $this->faker->sentence(rand(4, 10)),
             'city' => $this->faker->city,
             'state' => $this->faker->state,
             'country' => $this->faker->country,
             'address' => $this->faker->address,
-            'zip_code' => $this->faker->numberBetween(10000, 99999),         
+            'zipCode' => $this->faker->numberBetween(10000, 99999),         
         ];
     }
 

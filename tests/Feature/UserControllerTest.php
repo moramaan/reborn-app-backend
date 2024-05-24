@@ -24,22 +24,24 @@ class UserControllerTest extends TestCase
                 '*' => [
                     'id',
                     'name',
-                    'username',
+                    'lastName',
                     'email',
-                    'profile_description',
+                    'phone',
+                    'showPhone',
+                    'profileDescription',
                     'city',
                     'state',
                     'country',
                     'address',
-                    'zip_code',
-                    'is_admin',
-                    'is_deleted',
+                    'zipCode',
+                    'isAdmin',
+                    'isDeleted',
                     'created_at',
                     'updated_at',
                 ],
             ]);
-        //assert that only active users are returned, is_deleted = false
-        $response->assertJsonMissing(['is_deleted' => true]);
+        //assert that only active users are returned, isDeleted = false
+        $response->assertJsonMissing(['isDeleted' => true]);
 
     }
 
@@ -50,14 +52,16 @@ class UserControllerTest extends TestCase
         // Arrange
         $userData = [
             'name' => $this->faker->name,
-            'username' => $this->faker->unique()->regexify('[a-zA-Z0-9]{4,20}'),
+            'lastName' => $this->faker->unique()->regexify('[a-zA-Z0-9]{4,20}'),
             'email' => $this->faker->unique()->safeEmail,
-            'profile_description' => $this->faker->sentence(rand(4, 10)),
+            'phone' => $this->faker->phoneNumber,
+            'showPhone' => $this->faker->boolean,
+            'profileDescription' => $this->faker->sentence(rand(4, 10)),
             'city' => $this->faker->city,
             'state' => $this->faker->state,
             'country' => $this->faker->country,
             'address' => $this->faker->address,
-            'zip_code' => $this->faker->numberBetween(10000, 99999),
+            'zipCode' => $this->faker->numberBetween(10000, 99999),
         ];
 
         // Act
@@ -71,14 +75,16 @@ class UserControllerTest extends TestCase
                 'user' => [
                     'id',
                     'name',
-                    'username',
+                    'lastName',
                     'email',
-                    'profile_description',
+                    'phone',
+                    'showPhone',
+                    'profileDescription',
                     'city',
                     'state',
                     'country',
                     'address',
-                    'zip_code',
+                    'zipCode',
                     'created_at',
                     'updated_at',
                 ],
@@ -93,7 +99,7 @@ class UserControllerTest extends TestCase
         // Arrange
         $invalidData = [
             'name' => 'John',
-            'username' => 'john',
+            'lastName' => 'Doe',
             'email' => 'invalidemail',
         ];
 
@@ -168,7 +174,7 @@ class UserControllerTest extends TestCase
         $response->assertStatus(200);
 
         //assert that user is flagged as deleted in the database
-        $this->assertDatabaseHas('users', ['id' => $user->id, 'is_deleted' => true]);
+        $this->assertDatabaseHas('users', ['id' => $user->id, 'isDeleted' => true]);
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
@@ -181,7 +187,7 @@ class UserControllerTest extends TestCase
         $response->assertStatus(200);
 
         //assert that user is flagged as deleted in the database
-        $this->assertDatabaseHas('users', ['id' => $user->id, 'is_deleted' => true]);
+        $this->assertDatabaseHas('users', ['id' => $user->id, 'isDeleted' => true]);
         //assert that user's unsold items are deleted
         $this->assertCount(0, $user->unsoldItems()->get());
     }

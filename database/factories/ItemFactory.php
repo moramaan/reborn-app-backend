@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Item>
@@ -17,13 +18,14 @@ class ItemFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'id' => (string) Str::uuid(),
+            'title' => $this->faker->name(),
             'description' => $this->faker->sentence(rand(4, 10)),
             'price' => $this->faker->randomFloat(2, 0, 1000),
             'state' => $this->faker->randomElement(['available', 'reserved']),
             'condition' => $this->faker->numberBetween(0, 2),
-            'publish_date' => $this->faker->date(),
-            'user_id' => $this->faker->numberBetween(1, null)
+            'publishDate' => $this->faker->date(),
+            'userId' => $this->faker->numberBetween(1, null)
         ];
     }
 }

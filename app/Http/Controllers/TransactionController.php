@@ -38,7 +38,7 @@ class TransactionController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                'item_id' => 'required|int|min:1|exists:items,id',
+                'item_id' => 'required|string|min:1|exists:items,id',
                 'buyer_id' => 'required|int|min:1|exists:users,id',
                 'seller_id' => 'required|int|min:1|exists:users,id',
                 'price' => 'required|numeric|min:0',
@@ -53,6 +53,10 @@ class TransactionController extends Controller
             $validatedData['id'] = (string) Str::uuid();
 
             $transaction = Transaction::create($validatedData);
+
+            // Update item state to sold
+            $item->state = 'sold';
+            $item->save();
 
             return response()->json(['message' => 'Transaction created', 'transaction' => $transaction], 201);
         } catch (\InvalidArgumentException $e) {

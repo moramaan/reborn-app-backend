@@ -12,15 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('items', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->string('name');
+            $table->uuid('id')->primary();
+            $table->unsignedBigInteger('userId');
+            $table->foreign('userId')->references('id')->on('users')->onDelete('cascade');
+            $table->string('title');
             $table->text('description');
             $table->float('price');
+            $table->string('location')->nullable();
             $table->enum('state', ['available', 'sold', 'reserved'])->default('available');
             $table->tinyInteger('condition')->unsigned();
-            $table->date('publish_date');
+            $table->date('publishDate');
+            $table->json('images')->nullable();
             $table->timestamps();
         });
     }

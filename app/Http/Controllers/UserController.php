@@ -16,7 +16,6 @@ class UserController extends Controller
     public function index()
     {
         try {
-            // $users = User::all();
             $users = User::active()->get();
             return response()->json($users);
         } catch (\Exception $e) {
@@ -40,7 +39,7 @@ class UserController extends Controller
         try {
             $user = User::findOrFail($id);
             // flag user as deleted
-            $user->is_deleted = true;
+            $user->isDeleted = true;
             $user->save();
             // delete unsold items of this user
             DB::transaction(function () use ($user) {
@@ -59,14 +58,16 @@ class UserController extends Controller
         try {
             $validatedData = $request->validate([
                 'name' => 'required|string|min:4|max:255',
-                'username' => 'required|string|min:4|max:255|unique:users',
+                'lastName' => 'required|string|min:4|max:255',
                 'email' => 'required|email|unique:users',
-                'profile_description' => 'nullable|string|min:4|max:255',
+                'phone' => 'required|string|min:4|max:255|unique:users',
+                'showPhone' => 'required|boolean',
+                'profileDescription' => 'nullable|string|min:4|max:255',
                 'city' => 'nullable|string|min:4|max:255',
                 'state' => 'nullable|string|min:4|max:255',
                 'country' => 'nullable|string|min:4|max:255',
                 'address' => 'nullable|string|min:4|max:255',
-                'zip_code' => 'nullable|int|min:0|max:99999',
+                'zipCode' => 'nullable|int|min:0|max:99999',
             ]);
 
             $user = User::create($validatedData);
@@ -90,14 +91,16 @@ class UserController extends Controller
 
             $validatedData = $request->validate([
                 'name' => 'required|string|min:4|max:255',
-                'username' => 'required|string|min:4|max:255|unique:users,username,' . $id,
+                'lastName' => 'required|string|min:4|max:255',
                 'email' => 'required|email|unique:users,email,' . $id,
-                'profile_description' => 'nullable|string|min:4|max:255',
+                'phone' => 'required|string|min:4|max:255|unique:users,phone,' . $id,
+                'showPhone' => 'required|boolean',
+                'profileDescription' => 'nullable|string|min:4|max:255',
                 'city' => 'nullable|string|min:4|max:255',
                 'state' => 'nullable|string|min:4|max:255',
                 'country' => 'nullable|string|min:4|max:255',
                 'address' => 'nullable|string|min:4|max:255',
-                'zip_code' => 'nullable|int|min:0|max:99999',
+                'zipCode' => 'nullable|int|min:0|max:99999',
             ]);
 
             $user->update($validatedData);
