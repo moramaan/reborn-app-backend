@@ -67,7 +67,7 @@ class UserController extends Controller
                 'state' => 'nullable|string|min:4|max:255',
                 'country' => 'nullable|string|min:4|max:255',
                 'address' => 'nullable|string|min:4|max:255',
-                'zipCode' => ['required', 'string', 'regex:/^\d{5}$/'], // Can be 5 digits and start with 0 due to this data type changed to string
+                'zipCode' => ['nullable', 'string', 'regex:/^\d{5}$/'], // Can be 5 digits and start with 0 due to this data type changed to string
             ]);
 
             $user = User::create($validatedData);
@@ -100,7 +100,7 @@ class UserController extends Controller
                 'state' => 'nullable|string|min:4|max:255',
                 'country' => 'nullable|string|min:4|max:255',
                 'address' => 'nullable|string|min:4|max:255',
-                'zipCode' => ['required', 'string', 'regex:/^\d{5}$/'],
+                'zipCode' => ['nullable', 'string', 'regex:/^\d{5}$/'],
             ]);
 
             $user->update($validatedData);
