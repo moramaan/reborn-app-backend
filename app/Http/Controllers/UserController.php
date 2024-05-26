@@ -60,14 +60,14 @@ class UserController extends Controller
                 'name' => 'required|string|min:4|max:255',
                 'lastName' => 'required|string|min:4|max:255',
                 'email' => 'required|email|unique:users',
-                'phone' => 'required|string|min:4|max:255|unique:users',
+                'phone' => ['required', 'string', 'regex:/^(6|7)\d{8}$/', 'unique:users'], // Validate spanish phone number format
                 'showPhone' => 'required|boolean',
                 'profileDescription' => 'nullable|string|min:4|max:255',
                 'city' => 'nullable|string|min:4|max:255',
                 'state' => 'nullable|string|min:4|max:255',
                 'country' => 'nullable|string|min:4|max:255',
                 'address' => 'nullable|string|min:4|max:255',
-                'zipCode' => 'nullable|int|min:0|max:99999',
+                'zipCode' => ['required', 'string', 'regex:/^\d{5}$/'], // Can be 5 digits and start with 0 due to this data type changed to string
             ]);
 
             $user = User::create($validatedData);
@@ -93,14 +93,14 @@ class UserController extends Controller
                 'name' => 'required|string|min:4|max:255',
                 'lastName' => 'required|string|min:4|max:255',
                 'email' => 'required|email|unique:users,email,' . $id,
-                'phone' => 'required|string|min:4|max:255|unique:users,phone,' . $id,
+                'phone' => ['required', 'string', 'regex:/^(6|7)\d{8}$/', 'unique:users,phone,' . $id], // Validate phone number format
                 'showPhone' => 'required|boolean',
                 'profileDescription' => 'nullable|string|min:4|max:255',
                 'city' => 'nullable|string|min:4|max:255',
                 'state' => 'nullable|string|min:4|max:255',
                 'country' => 'nullable|string|min:4|max:255',
                 'address' => 'nullable|string|min:4|max:255',
-                'zipCode' => 'nullable|int|min:0|max:99999',
+                'zipCode' => ['required', 'string', 'regex:/^\d{5}$/'],
             ]);
 
             $user->update($validatedData);

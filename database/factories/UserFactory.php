@@ -24,17 +24,22 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
-            'lastName' => $this->faker->unique()->regexify('[a-zA-Z0-9]{4,20}'),
+            // 'name' => $this->faker->name(),
+            'name' => $this->faker->firstName(),
+            // 'lastName' => $this->faker->unique()->regexify('[a-zA-Z0-9]{4,20}'),
+            'lastName' => $this->faker->lastName(),
             'email' => $this->faker->unique()->safeEmail(),
-            'phone' => $this->faker->phoneNumber,
+            'phone' => $this->faker->randomElement([
+                $this->faker->numerify('6########'), // Format for mobile phones starting with '6'
+                $this->faker->numerify('7########')  // Format for mobile phones starting with '7'
+            ]),
             'showPhone' => $this->faker->boolean,
             'profileDescription' => $this->faker->sentence(rand(4, 10)),
             'city' => $this->faker->city,
             'state' => $this->faker->state,
-            'country' => $this->faker->country,
+            'country' => 'España',
             'address' => $this->faker->address,
-            'zipCode' => $this->faker->numberBetween(10000, 99999),         
+            'zipCode' => $this->faker->numerify('#####'),
         ];
     }
 
