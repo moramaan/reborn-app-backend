@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('state')->nullable();
             $table->string('country')->nullable();
             $table->string('address')->nullable();
-            $table->integer('zipCode')->nullable();
+            $table->string('zipCode')->nullable(); // changed to string to allow 0 at the beggining
             $table->boolean('isAdmin')->default(false);
             $table->boolean('isDeleted')->default(false);
             $table->timestamps();
