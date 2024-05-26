@@ -24,10 +24,10 @@ Route::get('/items/{id}', [ItemController::class, 'show']);
 Route::post('/items/search', [ItemController::class, 'search']);
 Route::delete('/items/{id}', [ItemController::class, 'destroy']);
 // Items update and store only accept multipart due to the image upload
-Route::middleware([VerifyMultipartContentType::class])->group(function () {
-    Route::put('/items/{id}', [ItemController::class, 'update']);
-    Route::post('/items', [ItemController::class, 'store']);
-});
+// Route::middleware([VerifyMultipartContentType::class])->group(function () {
+Route::put('/items/{id}', [ItemController::class, 'update']);
+Route::post('/items', [ItemController::class, 'store']);
+// });
 
 // Transaction routes
 Route::get('/transactions', [TransactionController::class, 'index']);
