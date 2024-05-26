@@ -27,6 +27,7 @@ class ItemControllerTest extends TestCase
                     'title',
                     'description',
                     'price',
+                    'category',
                     'location',
                     'state',
                     'condition',
@@ -50,6 +51,7 @@ class ItemControllerTest extends TestCase
         $itemData = [
             'title' => $this->faker->name(),
             'description' => $this->faker->sentence(rand(4, 10)),
+            'category' => $this->faker->randomElement(['Cascos', 'Monos', 'Guantes', 'Chaquetas', 'Pantalones', 'Botas', 'Accesorios', 'Ropa Interior', 'Recambios']),
             'price' => $this->faker->randomFloat(2, 0, 1000),
             'state' => $this->faker->randomElement(['available', 'reserved']),
             'condition' => $this->faker->numberBetween(0, 2),
@@ -71,6 +73,7 @@ class ItemControllerTest extends TestCase
                     'title',
                     'description',
                     'price',
+                    'category',
                     'state',
                     'condition',
                     'publishDate',
@@ -141,6 +144,7 @@ class ItemControllerTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors([
                 'price',
+                'category',
                 'state',
                 'condition',
                 'publishDate',
@@ -193,6 +197,7 @@ class ItemControllerTest extends TestCase
                 'title',
                 'description',
                 'price',
+                'category',
                 'state',
                 'condition',
                 'publishDate',
@@ -223,7 +228,7 @@ class ItemControllerTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
-    public function it_can_search_items_by_name()
+    public function it_can_search_items_by_title()
     {
         $user = User::factory()->create();
         Item::factory()->create(['userId' => $user->id, 'title' => 'Item 1']);
@@ -242,7 +247,7 @@ class ItemControllerTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
-    public function it_can_search_items_by_partial_name()
+    public function it_can_search_items_by_partial_title()
     {
         $user = User::factory()->create();
         Item::factory()->create(['userId' => $user->id, 'title' => 'Item 1']);

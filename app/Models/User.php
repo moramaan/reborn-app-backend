@@ -32,6 +32,15 @@ class User extends Authenticatable
         'updated_at',
     ];
 
+    protected $casts = [
+        'showPhone' => 'boolean',
+        'isAdmin' => 'boolean',
+        'isDeleted' => 'boolean',
+    ];
+
+    // this way this fields are not returned in the response
+    protected $hidden = ['created_at', 'updated_at', 'isDeleted', 'country', 'address', 'zipCode'];
+
     public function items()
     {
         return $this->hasMany(Item::class, 'userId', 'id');
@@ -63,5 +72,4 @@ class User extends Authenticatable
     {
         return $query->where('isDeleted', false);
     }
-
 }

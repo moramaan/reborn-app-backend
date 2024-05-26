@@ -19,6 +19,7 @@ class Item extends Model
         'title',
         'description',
         'price',
+        'category',
         'location',
         'state',
         'condition',

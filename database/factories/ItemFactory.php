@@ -22,6 +22,7 @@ class ItemFactory extends Factory
             'title' => $this->faker->name(),
             'description' => $this->faker->sentence(rand(4, 10)),
             'price' => $this->faker->randomFloat(2, 0, 1000),
+            'category' => $this->faker->randomElement(['Cascos', 'Monos', 'Guantes', 'Chaquetas', 'Pantalones', 'Botas', 'Accesorios', 'Ropa Interior', 'Recambios']),
             'state' => $this->faker->randomElement(['available', 'reserved']),
             'condition' => $this->faker->numberBetween(0, 2),
             'publishDate' => $this->faker->date(),
