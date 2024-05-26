@@ -123,4 +123,15 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Frontend Url
+    |--------------------------------------------------------------------------
+    |
+    | This URL is used by the frontend to make requests to the API. It is used
+    | to configure CORS settings.
+    |
+    */
+    'frontend_url' => env('FRONTEND_URL'),
 ];
