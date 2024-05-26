@@ -1,13 +1,10 @@
 <?php
 
-# this will be my user controller
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Str;
 use App\Models\Item;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -235,23 +232,6 @@ class ItemController extends Controller
             return response()->json(['error' => 'Validation failed', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to update item: ' . $e->getMessage()], 500);
-        }
-    }
-
-    /**
-     * Map the condition to the database value.
-     */
-    private function mapCondition($condition)
-    {
-        switch ($condition) {
-            case 'Nuevo':
-                return 1; // 1 represents 'Nuevo'
-            case 'Como nuevo':
-                return 2; // 2 represents 'Como nuevo'
-            case 'Buen estado':
-                return 3; // 3 represents 'Buen estado'
-            default:
-                return 0; // 0 represents 'unknown'
         }
     }
 }
