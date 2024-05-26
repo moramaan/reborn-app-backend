@@ -1,3 +1,4 @@
+/database/seeders/demoData/seedData.json
 /.phpunit.cache
 /node_modules
 /public/build
@@ -8,6 +9,7 @@
 .env
 .env.backup
 .env.production
+.env.prod
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml

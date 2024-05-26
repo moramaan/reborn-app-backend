@@ -1,14 +1,12 @@
 <?php
 
-# this will be my user controller
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Str;
 use App\Models\Item;
+use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 
@@ -109,16 +107,21 @@ class ItemController extends Controller
                 'title' => 'required|string|min:4|max:255',
                 'description' => 'required|string|min:4|max:255',
                 'price' => 'required|numeric|min:0',
-                'category' => 'required|string|max:255', // 'Cascos', 'Monos', 'Guantes', 'Chaquetas', 'Pantalones', 'Botas', 'Accesorios', 'Ropa Interior', 'Recambios
+                'category' => 'required|string|max:255', // 'Cascos', 'Monos', 'Guantes', 'Chaquetas', 'Pantalones', 'Botas', 'Accesorios', 'Ropa Interior', 'Recambios'
                 'location' => 'nullable|string|max:255',
                 'state' => 'nullable|in:available,reserved',
-                'condition' => 'required|int|min:0|max:2',
+                'condition' => 'required|int|min:0|max:3',
                 'publishDate' => 'required|date',
                 'userId' => 'required|int|min:1|exists:users,id',
                 'images' => 'nullable|array|max:5',
                 'images.*' => 'image|mimes:jpeg,png,jpg|max:2048',
             ]);
 
+            // Set location to the owner's location if not provided
+            if (!isset($validatedData['location'])) {
+                $owner = User::findOrFail($validatedData['userId']);
+                $validatedData['location'] = "{$owner->city}, {$owner->state}";
+            }
             // remove the images key-value from validatedData
             $creationData = array_filter($validatedData, function ($key) {
                 return $key !== 'images';
@@ -187,12 +190,18 @@ class ItemController extends Controller
                 'category' => 'required|string|max:255',
                 'state' => 'nullable|in:available,sold,reserved',
                 'location' => 'nullable|string|max:255',
-                'condition' => 'required|int|min:0|max:2',
+                'condition' => 'required|int|min:0|max:3',
                 'publishDate' => 'required|date',
                 'userId' => 'required|int|min:1|exists:users,id',
                 'images' => 'nullable|array|max:5',
                 'images.*' => 'image|mimes:jpeg,png,jpg|max:2048',
             ]);
+
+            // if the item has not location setted and is not provided by the request, build it as did in store method
+            if (!isset($item->location) || $item->location == '' && !isset($validatedData['location'])) {
+                $owner = User::findOrFail($validatedData['userId']);
+                $validatedData['location'] = "{$owner->city}, {$owner->state}";
+            }
 
             // Upload new images to Cloudinary if provided
             if ($request->hasFile('images')) {
