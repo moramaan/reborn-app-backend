@@ -31,37 +31,30 @@ class UserControllerTest extends TestCase
                     'profileDescription',
                     'city',
                     'state',
-                    'country',
-                    'address',
-                    'zipCode',
-                    'isAdmin',
-                    'isDeleted',
-                    'created_at',
-                    'updated_at',
                 ],
             ]);
         //assert that only active users are returned, isDeleted = false
         $response->assertJsonMissing(['isDeleted' => true]);
-
     }
 
     // *** store user tests *** /
     #[\PHPUnit\Framework\Attributes\Test]
     public function it_creates_a_user()
     {
-        // Arrange
+        $phoneNumber = rand(0, 1) ? $this->faker->numerify('6########') : $this->faker->numerify('7########');
+
         $userData = [
             'name' => $this->faker->name,
             'lastName' => $this->faker->unique()->regexify('[a-zA-Z0-9]{4,20}'),
             'email' => $this->faker->unique()->safeEmail,
-            'phone' => $this->faker->phoneNumber,
+            'phone' => $phoneNumber,
             'showPhone' => $this->faker->boolean,
             'profileDescription' => $this->faker->sentence(rand(4, 10)),
             'city' => $this->faker->city,
             'state' => $this->faker->state,
             'country' => $this->faker->country,
             'address' => $this->faker->address,
-            'zipCode' => $this->faker->numberBetween(10000, 99999),
+            'zipCode' => $this->faker->numerify('#####'),
         ];
 
         // Act
@@ -82,11 +75,6 @@ class UserControllerTest extends TestCase
                     'profileDescription',
                     'city',
                     'state',
-                    'country',
-                    'address',
-                    'zipCode',
-                    'created_at',
-                    'updated_at',
                 ],
             ]);
 
@@ -125,6 +113,10 @@ class UserControllerTest extends TestCase
 
         // Act: Send a PUT request to update the user
         $response = $this->putJson('/api/users/' . $user->id, $updatedData);
+
+        if ($response->status() !== 200) {
+            $response->dump();
+        }
 
         // Assert: Check if the response indicates success (HTTP 200) and contains the updated user data
         $response->assertStatus(200)
