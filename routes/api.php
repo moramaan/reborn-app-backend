@@ -4,6 +4,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\VerifyJsonContentType;
+use App\Http\Middleware\VerifyMultipartContentType;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 
@@ -22,6 +23,11 @@ Route::get('/items', [ItemController::class, 'index']);
 Route::get('/items/{id}', [ItemController::class, 'show']);
 Route::post('/items/search', [ItemController::class, 'search']);
 Route::delete('/items/{id}', [ItemController::class, 'destroy']);
+// Items update and store only accept multipart due to the image upload
+Route::middleware([VerifyMultipartContentType::class])->group(function () {
+    Route::put('/items/{id}', [ItemController::class, 'update']);
+    Route::post('/items', [ItemController::class, 'store']);
+});
 
 // Transaction routes
 Route::get('/transactions', [TransactionController::class, 'index']);
@@ -36,8 +42,6 @@ Route::put('/transactions/{id}', function () {
 // Create and update routes
 Route::middleware([VerifyJsonContentType::class])->group(function () {
     Route::post('/users', [UserController::class, 'store']);
-    Route::post('/items', [ItemController::class, 'store']);
     Route::post('/transactions', [TransactionController::class, 'store']);
     Route::put('/users/{id}', [UserController::class, 'update']);
-    Route::put('/items/{id}', [ItemController::class, 'update']);
 });
