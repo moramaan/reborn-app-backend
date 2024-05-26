@@ -3,15 +3,24 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+// use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Routing\Controller;
 use App\Models\Item;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
+use Cloudinary\Cloudinary;
 
 class ItemController extends Controller
 {
+
+    protected $cloudinary;
+
+    public function __construct(Cloudinary $cloudinary)
+    {
+        $this->cloudinary = $cloudinary;
+    }
+
     public function index()
     {
         $items = Item::listAvailableItems();
@@ -111,7 +120,8 @@ class ItemController extends Controller
                 'location' => 'nullable|string|max:255',
                 'state' => 'nullable|in:available,reserved',
                 'condition' => 'required|int|min:0|max:3',
-                'publishDate' => 'required|date',
+                'publishDate' => 'nullable|date',
+                'publishDate' => 'nullable|date',
                 'userId' => 'required|int|min:1|exists:users,id',
                 'images' => 'nullable|array|max:5',
                 'images.*' => 'image|mimes:jpeg,png,jpg|max:2048',
@@ -126,27 +136,22 @@ class ItemController extends Controller
             $creationData = array_filter($validatedData, function ($key) {
                 return $key !== 'images';
             }, ARRAY_FILTER_USE_KEY);
+            $creationData['publishDate'] = date('Y-m-d H:i:s', time());
 
             // Create the item
             $item = Item::create($creationData);
 
-            // Upload images to Cloudinary with the item's ID as part of the folder structure
-            $uploadedImageUrls = [];
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    // Upload image to Cloudinary
-                    try {
-                        $uploadedFile = Cloudinary::upload($image->getRealPath(), [
-                            'folder' => 'reborn/' . $item->id, // Folder structure: reborn/{itemId}
-                        ]);
+            $images = $request->file('images');
 
-                        // Put into the array the secure URL of the uploaded image
-                        array_push($uploadedImageUrls, $uploadedFile->getSecurePath());
-                    } catch (\Exception $e) {
-                        // Delete the item if image upload fails
-                        $item->delete();
-                        throw new \Exception('Failed to upload image: ' . $e->getMessage());
+            $uploadedImageUrls = [];
+            if ($images) {
+                try {
+                    foreach ($images as $image) {
+                        $uploadResult = $this->cloudinary->uploadApi()->upload($image->getRealPath());
+                        $uploadedImageUrls[] = $uploadResult['secure_url'];
                     }
+                } catch (\Exception $e) {
+                    throw new \Exception('Failed to upload image: ' . $e->getMessage());
                 }
             }
 
@@ -191,7 +196,7 @@ class ItemController extends Controller
                 'state' => 'nullable|in:available,sold,reserved',
                 'location' => 'nullable|string|max:255',
                 'condition' => 'required|int|min:0|max:3',
-                'publishDate' => 'required|date',
+                'publishDate' => 'nullable|date',
                 'userId' => 'required|int|min:1|exists:users,id',
                 'images' => 'nullable|array|max:5',
                 'images.*' => 'image|mimes:jpeg,png,jpg|max:2048',
@@ -203,25 +208,20 @@ class ItemController extends Controller
                 $validatedData['location'] = "{$owner->city}, {$owner->state}";
             }
 
-            // Upload new images to Cloudinary if provided
-            if ($request->hasFile('images')) {
-                $uploadedImageUrls = [];
-                foreach ($request->file('images') as $image) {
-                    // Upload image to Cloudinary
-                    try {
-                        $uploadedFile = Cloudinary::upload($image->getRealPath(), [
-                            'folder' => 'reborn/' . $item->id, // Folder structure: reborn/{itemId}
-                        ]);
+            $images = $request->file('images');
 
-                        // Put into the array the secure URL of the uploaded image
-                        array_push($uploadedImageUrls, $uploadedFile->getSecurePath());
-                    } catch (\Exception $e) {
-                        throw new \Exception('Failed to upload image: ' . $e->getMessage());
+            $uploadedImageUrls = [];
+            if ($images) {
+                try {
+                    foreach ($images as $image) {
+                        $uploadResult = $this->cloudinary->uploadApi()->upload($image->getRealPath());
+                        $uploadedImageUrls[] = $uploadResult['secure_url'];
                     }
+                } catch (\Exception $e) {
+                    throw new \Exception('Failed to upload image: ' . $e->getMessage());
                 }
                 $validatedData['images'] = $uploadedImageUrls;
             }
-
             // Update the item
             $item->update($validatedData);
 
