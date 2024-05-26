@@ -31,13 +31,22 @@ class ItemsTableSeeder extends Seeder
         'La Rioja' => ['Logroño'],
     ];
 
+    private $state, $city;
+
     public function run()
     {
-        // Create a user using the UserFactory with a random Spanish location
-        $user = User::factory()->create([
-            'city' => $this->getRandomCity(),
-            'state' => $this->getRandomState(),
-        ]);
+        $usersIds = [];
+        for ($i = 0; $i < 5; $i++) {
+            $this->state = $this->getRandomState();
+            $this->city = $this->getCityFromState();
+            // Create a user using the UserFactory with a random Spanish location
+            $newUser = User::factory()->create([
+                'city' => $this->city,
+                'state' => $this->state,
+            ]);
+            array_push($usersIds, $newUser->id);
+        }
+
 
         // Path to the JSON file
         $jsonPath = database_path("seeders/demoData/seedData.json");
@@ -49,6 +58,9 @@ class ItemsTableSeeder extends Seeder
         $items = json_decode($jsonData, true);
 
         foreach ($items as $itemData) {
+            // Get a random user ID
+            $userId = $usersIds[array_rand($usersIds)];
+            $user = User::findOrfail($userId);
             // Prepare the data for insertion
             $item = new Item([
                 'id' => $itemData['id'],
@@ -61,7 +73,7 @@ class ItemsTableSeeder extends Seeder
                 'state' => $itemData['reserved'] ? 'reserved' : 'available',
                 'condition' => $this->mapCondition($itemData['condition']),
                 'publishDate' => now()->toDateString(), // Or any specific date
-                'images' => json_encode($itemData['images']),
+                'images' => $itemData['images'],
             ]);
 
             // Save the item
@@ -89,10 +101,9 @@ class ItemsTableSeeder extends Seeder
     /**
      * Get a random Spanish city.
      */
-    private function getRandomCity()
+    private function getCityFromState()
     {
-        $state = $this->getRandomState();
-        return $this->spanishLocations[$state][array_rand($this->spanishLocations[$state])];
+        return $this->spanishLocations[$this->state][array_rand($this->spanishLocations[$this->state])];
     }
 
     /**

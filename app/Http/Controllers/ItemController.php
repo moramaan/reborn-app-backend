@@ -116,11 +116,16 @@ class ItemController extends Controller
                 'publishDate' => 'required|date',
                 'userId' => 'required|int|min:1|exists:users,id',
                 'images' => 'nullable|array|max:5',
-                'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'images.*' => 'image|mimes:jpeg,png,jpg|max:2048',
             ]);
 
+            // remove the images key-value from validatedData
+            $creationData = array_filter($validatedData, function ($key) {
+                return $key !== 'images';
+            }, ARRAY_FILTER_USE_KEY);
+
             // Create the item
-            $item = Item::create($validatedData);
+            $item = Item::create($creationData);
 
             // Upload images to Cloudinary with the item's ID as part of the folder structure
             $uploadedImageUrls = [];
@@ -132,8 +137,8 @@ class ItemController extends Controller
                             'folder' => 'reborn/' . $item->id, // Folder structure: reborn/{itemId}
                         ]);
 
-                        // Get the secure URL of the uploaded image
-                        $uploadedImageUrls[] = $uploadedFile->getSecurePath();
+                        // Put into the array the secure URL of the uploaded image
+                        array_push($uploadedImageUrls, $uploadedFile->getSecurePath());
                     } catch (\Exception $e) {
                         // Delete the item if image upload fails
                         $item->delete();
@@ -142,11 +147,8 @@ class ItemController extends Controller
                 }
             }
 
-            // Add the uploaded images to the validated data
-            $validatedData['images'] = json_encode($uploadedImageUrls);
-
             // Update the item with the image URLs
-            $item->update(['images' => $validatedData['images']]);
+            $item->update(['images' => $uploadedImageUrls]);
 
             return response()->json(['message' => 'Item created', 'item' => $item], 201);
         } catch (ValidationException $e) {
@@ -189,11 +191,12 @@ class ItemController extends Controller
                 'publishDate' => 'required|date',
                 'userId' => 'required|int|min:1|exists:users,id',
                 'images' => 'nullable|array|max:5',
-                'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'images.*' => 'image|mimes:jpeg,png,jpg|max:2048',
             ]);
 
             // Upload new images to Cloudinary if provided
             if ($request->hasFile('images')) {
+                $uploadedImageUrls = [];
                 foreach ($request->file('images') as $image) {
                     // Upload image to Cloudinary
                     try {
@@ -201,14 +204,13 @@ class ItemController extends Controller
                             'folder' => 'reborn/' . $item->id, // Folder structure: reborn/{itemId}
                         ]);
 
-                        // Get the secure URL of the uploaded image
-                        $uploadedImageUrls[] = $uploadedFile->getSecurePath();
+                        // Put into the array the secure URL of the uploaded image
+                        array_push($uploadedImageUrls, $uploadedFile->getSecurePath());
                     } catch (\Exception $e) {
-                        // Delete the item if image upload fails
-                        $item->delete();
                         throw new \Exception('Failed to upload image: ' . $e->getMessage());
                     }
                 }
+                $validatedData['images'] = $uploadedImageUrls;
             }
 
             // Update the item
