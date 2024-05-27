@@ -23,7 +23,7 @@ class ItemController extends Controller
 
     public function index()
     {
-        $items = Item::listAvailableItems();
+            $items = Item::listAvailableItems();
         return response()->json($items);
     }
 

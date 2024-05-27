@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->string('auth0_id')->unique()->nullable(); //for test users
             $table->string('name');
             $table->string('lastName');
             $table->string('email')->unique();
