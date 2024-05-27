@@ -3,6 +3,7 @@
 ![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
 ![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+![Auth0](https://img.shields.io/badge/Auth0-EB5424?style=for-the-badge&logo=auth0&logoColor=white)
 
 ## Overview
 
@@ -13,10 +14,13 @@ Reborn App Backend is the server-side application for a marketplace that gives m
 - **Laravel 11**: A robust PHP framework for building scalable web applications.
 - **Cloudinary**: A cloud-based image and video management service.
 - **MySQL**: A reliable and powerful relational database management system.
+- **Auth0**: A flexible, drop-in solution to add authentication and authorization services to your applications.
 
 ## Features
 
 - User Authentication and Authorization
+  - Implemented with Auth0 login
+  - Backend decodes JWT bearer tokens sent by the frontend where Auth0 login occurs
 - Product Listings
 - Product searches by name and/or filters
 - Image Upload and Management
@@ -28,6 +32,7 @@ Reborn App Backend is the server-side application for a marketplace that gives m
 - Composer
 - MySQL
 - Cloudinary Account
+- Auth0 Account
 
 ## Installation
 
@@ -76,7 +81,7 @@ Copy the `.env.example` to `.env` and configure your environment variables:
 cp .env.example .env
 ```
 
-Set your database and Cloudinary configurations in the `.env` file.
+Set your database, Cloudinary, and Auth0 configurations in the `.env` file.
 
 ### Generate Application Key
 
