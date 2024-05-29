@@ -12,7 +12,11 @@ class Auth0Middleware
 {
     public function handle(Request $request, Closure $next)
     {
-
+        $method = $request->method();
+        $path = $request->path();
+        if ($method === 'OPTIONS' || $path === 'items' && $method === 'POST' && isset($request->filters)) {
+            return $next($request);
+        }
         $authController = new AuthController();
         try {
             $token = $request->bearerToken();

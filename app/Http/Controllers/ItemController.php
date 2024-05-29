@@ -23,7 +23,7 @@ class ItemController extends Controller
 
     public function index()
     {
-            $items = Item::listAvailableItems();
+        $items = Item::listAvailableItems();
         return response()->json($items);
     }
 
@@ -49,36 +49,42 @@ class ItemController extends Controller
                 throw new \InvalidArgumentException('Invalid filters format');
             }
 
-            foreach ($filters as $filter) {
-                if (isset($filter['column'], $filter['value'])) {
-                    $column = $filter['column'];
-                    $value = $filter['value'];
 
-                    if ($column === 'price') {
+
+            foreach ($filters as $filter) {
+                switch ($filter['column']) {
+                    case 'price':
                         if (isset($filter['min'])) {
                             $query->where('price', '>=', $filter['min']);
                         }
                         if (isset($filter['max'])) {
                             $query->where('price', '<=', $filter['max']);
                         }
-                    } elseif ($column === 'title') {
-                        $query->where('title', 'like', "%$value%");
-                    } else {
-                        if (!in_array($column, app(Item::class)->getFillable())) {
-                            throw new \InvalidArgumentException("Column '$column' is not searchable");
-                        }
-                        if ($column === 'state' && $value === 'sold') {
-                            throw new \InvalidArgumentException("Column '$column' cannot be used to search for sold items");
-                        }
-                        $query->where($column, $value);
-                    }
+                        break;
+                    case 'title':
+                        $query->where('title', 'like', "%{$filter['value']}%");
+                        break;
+                    case 'category':
+                        $query->where('category', $filter['value']);
+                        break;
+                    case 'state':
+                        $query->where('state', $filter['value']);
+                        break;
+                    case 'condition':
+                        $query->where('condition', $filter['value']);
+                        break;
+                    case 'location':
+                        $query->where('location', $filter['value']);
+                        break;
+                    case 'publishedSince':
+                        $query->whereDate('publishDate', '>=', now()->subDays($filter['value']));
+                        break;
+                        // Add more cases for handling other filters
                 }
+            }
 
-                if (isset($filter['orderBy'])) {
-                    $orderBy = $filter['orderBy'];
-                    $order = strtolower($filter['order'] ?? '') === 'desc' ? 'desc' : 'asc';
-                    $query->orderBy($orderBy, $order);
-                }
+            if (isset($request->orderBy)) {
+                $query->orderBy($request->orderBy, $request->order ?? 'asc');
             }
 
             $results = $query->get()->toArray();
@@ -90,6 +96,7 @@ class ItemController extends Controller
             return response()->json(['error' => 'Failed to search items'], 500);
         }
     }
+
 
     public function destroy($id)
     {
