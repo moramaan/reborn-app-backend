@@ -49,8 +49,7 @@ class ItemController extends Controller
                 throw new \InvalidArgumentException('Invalid filters format');
             }
 
-
-
+            $categoryFilters = [];
             foreach ($filters as $filter) {
                 switch ($filter['column']) {
                     case 'price':
@@ -65,7 +64,7 @@ class ItemController extends Controller
                         $query->where('title', 'like', "%{$filter['value']}%");
                         break;
                     case 'category':
-                        $query->where('category', $filter['value']);
+                        $categoryFilters[] = $filter['value'];
                         break;
                     case 'state':
                         $query->where('state', $filter['value']);
@@ -83,6 +82,15 @@ class ItemController extends Controller
                 }
             }
 
+            // Add the category filters as an "or" condition
+            if (!empty($categoryFilters)) {
+                $query->where(function ($q) use ($categoryFilters) {
+                    foreach ($categoryFilters as $category) {
+                        $q->orWhere('category', $category);
+                    }
+                });
+            }
+
             if (isset($request->orderBy)) {
                 $query->orderBy($request->orderBy, $request->order ?? 'asc');
             }
@@ -96,6 +104,7 @@ class ItemController extends Controller
             return response()->json(['error' => 'Failed to search items'], 500);
         }
     }
+
 
 
     public function destroy($id)
