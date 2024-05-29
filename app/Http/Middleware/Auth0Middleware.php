@@ -2,57 +2,68 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Controllers\AuthController;
 use App\Models\User;
-use Auth0\SDK\Auth0;
-use Auth0\SDK\Configuration\SdkConfiguration;
 use Closure;
+use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Http\Request;
 
 class Auth0Middleware
 {
     public function handle(Request $request, Closure $next)
     {
-        $token = $request->bearerToken();
 
-        if (!$token) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
-        $config = new SdkConfiguration(
-            strategy: SdkConfiguration::STRATEGY_API,
-            domain: config('auth0.domain'),
-            audience: config('auth0.api_identifier')
-        );
-
-        $auth0 = new Auth0($config);
-
+        $authController = new AuthController();
         try {
-            $decodedToken = $auth0->decode($token);
-            // Attach the decoded token to the request for further usage if needed
-            $request->merge(['auth0Token' => $decodedToken]);
+            $token = $request->bearerToken();
+            $token = $authController->DecodeRawJWT($token);
+
+
+            //TODO: fix this part due to unprocessable content error 422 if
+            //front sends data as array instead of only one serialized object...
+            // if (is_object($token)) {
+            //     $token = (array) $token;
+            // }
+            // $data = $request->all();
+            // $auth0_data = null;
+
+            // // Check if 'data' is an array and has more than one element
+            // if (is_array($data) && count($data) > 1) {
+            //     // Remove the first element from the array
+            //     $auth0_data = Json::decode(array_shift($data));
+
+            //     // Replace the request data with only the remaining elements (with expected normal data)
+            //     $request->replace($request->except(['0']));
+            //     dump($request->all());
+            // } else {
+            //     dump('data', $data);
+            // }
+            // try {
+            //     //find first by auth0_id
+            //     $user = User::where('auth0_id', $token['sub'])->first();
+            //     if (!$user) {
+            //         // find by name and email->unique
+            //         User::firstOrCreate(
+            //             [
+            //                 'name' => $auth0_data['given_name'],
+            //                 'email' => $auth0_data['email']
+            //             ],
+            //             [
+            //                 'auth0_id' => $token['sub'],
+            //                 'name' => $auth0_data['given_name'],
+            //                 'lastName' => $auth0_data['family_name'],
+            //                 'email' => $auth0_data['email'],
+            //                 'phone' => "",
+            //             ],
+            //         );
+            //     }
+            // } catch (\Throwable $e) {
+            //     return response()->json(['error' => 'Internal error', 'error message' => $e->getMessage()], 500);
+            // }
 
             return $next($request);
-            // $decodedToken = $auth0->decode($token);
-            // $request->merge(['auth0Token' => $decodedToken]);
-
-            // // Extract user information from the token
-            // $auth0UserId = $decodedToken->sub;
-            // $auth0UserEmail = $decodedToken->email ?? null;
-
-            // // Find or create the user in the database
-            // $user = User::firstOrCreate(
-            //     ['auth0_id' => $auth0UserId],
-            //     ['email' => $auth0UserEmail]
-            // );
-
-            // // Attach the user to the request
-            // $request->setUserResolver(function () use ($user) {
-            //     return $user;
-            // });
-
-            // return $next($request);
         } catch (\Throwable $e) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['error' => 'Unauthorized', 'error message' => $e->getMessage()], 401);
         }
     }
 }

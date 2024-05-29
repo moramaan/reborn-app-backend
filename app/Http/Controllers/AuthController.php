@@ -2,32 +2,75 @@
 
 namespace App\Http\Controllers;
 
-use Auth0\SDK\Auth0;
-use Auth0\SDK\Configuration\SdkConfiguration;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Exception;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+use DateTimeImmutable;
+use phpseclib3\Crypt\RSA;
+use phpseclib3\Math\BigInteger;
 
 class AuthController extends Controller
 {
-    public function decodeToken(Request $request)
+
+    public function DecodeRawJWT($jwt)
     {
-        $token = $request->bearerToken();
+        // URL to fetch the JWKS
+        $jwksUrl = env('JWKS_URI');
 
-        $config = new SdkConfiguration(
-            strategy: SdkConfiguration::STRATEGY_API,
-            domain: config('auth0.domain'),
-            audience: config('auth0.api_identifier')
-        );
+        // Fetch the JWKS
+        $jwks = json_decode(file_get_contents($jwksUrl), true);
 
-        $auth0 = new Auth0($config);
+        // Extract the JWT header
+        $tokenParts = explode('.', $jwt);
+        $header = json_decode(base64_decode($tokenParts[0]), true);
+        $kid = $header['kid'];
+
+        // Find the key with the matching kid
+        $publicKey = null;
+        foreach ($jwks['keys'] as $key) {
+            if ($key['kid'] === $kid) {
+                $publicKey = $this->convertJWKToPEM($key);
+                break;
+            }
+        }
+
+        if (!$publicKey) {
+            throw new Exception('Public key not found.');
+        }
 
         try {
-            $decodedToken = $auth0->decode($token);
-            // Now you can use $decodedToken for further processing
-            return response()->json($decodedToken);
-        } catch (\Throwable $e) {
-            // Handle token decoding errors
-            return response()->json(['error' => 'Token decoding failed'], 401);
+            $token = JWT::decode($jwt, new Key($publicKey, 'RS256'));
+            $now = new DateTimeImmutable();
+        } catch (Exception $e) {
+            throw new Exception('Unauthorized: ' . $e->getMessage());
         }
+
+        return $token;
+    }
+
+    private function convertJWKToPEM($jwk)
+    {
+        $modulus = new BigInteger($this->base64UrlDecode($jwk['n']), 256);
+        $exponent = new BigInteger($this->base64UrlDecode($jwk['e']), 256);
+
+        $rsa = RSA::load([
+            'n' => $modulus,
+            'e' => $exponent
+        ]);
+
+        $publicKey = $rsa->toString('PKCS8');
+
+        return $publicKey;
+    }
+
+    private function base64UrlDecode($input)
+    {
+        $remainder = strlen($input) % 4;
+        if ($remainder) {
+            $padlen = 4 - $remainder;
+            $input .= str_repeat('=', $padlen);
+        }
+        return base64_decode(strtr($input, '-_', '+/'));
     }
 }
