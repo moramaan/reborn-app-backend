@@ -25,6 +25,14 @@ class UserController extends Controller
     public function show($id)
     {
         try {
+            // could come id, or auth0_id, check data type
+            if (!is_numeric($id)) {
+                $user = User::where('auth0_id', $id)->first();
+                if (!$user) {
+                    return response()->json(['error' => 'User not found'], 404);
+                }
+                return response()->json($user);
+            }
             $user = User::findOrFail($id);
             return response()->json($user);
         } catch (ModelNotFoundException $e) {
@@ -37,6 +45,22 @@ class UserController extends Controller
     public function destroy($id)
     {
         try {
+            //could come id, or auth0_id, check data type
+            if (!is_numeric($id)) {
+                $user = User::where('auth0_id', $id)->first();
+                if (!$user) {
+                    return response()->json(['error' => 'User not found'], 404);
+                }
+                // flag user as deleted
+                $user->isDeleted = true;
+                $user->save();
+                // delete unsold items of this user
+                DB::transaction(function () use ($user) {
+                    $user->unsoldItems()->delete();
+                }, 5);
+                return response()->json($user);
+            }
+
             $user = User::findOrFail($id);
             // flag user as deleted
             $user->isDeleted = true;
