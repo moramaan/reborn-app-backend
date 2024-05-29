@@ -43,7 +43,7 @@ class AuthController extends Controller
             $token = JWT::decode($jwt, new Key($publicKey, 'RS256'));
             $now = new DateTimeImmutable();
         } catch (Exception $e) {
-            throw new Exception('Unauthorized: ' . $e->getMessage());
+            throw new Exception('Unauthorized decoding: ' . $e->getMessage());
         }
 
         return $token;

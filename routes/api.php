@@ -48,14 +48,18 @@ Route::put('/transactions/{id}', function () {
 //     Route::put('/users/{id}', [UserController::class, 'update']);
 // });
 
+Route::middleware([Auth0Middleware::class])->group(function () {
+    Route::put('/items/{id}', [ItemController::class, 'update']);
+    Route::delete('/items/{id}', [ItemController::class, 'destroy']);
+    Route::post('/items', [ItemController::class, 'store']);
+    Route::delete('/items/{id}', [ItemController::class, 'destroy']);
+});
+
 
 Route::middleware([Auth0Middleware::class, VerifyJsonContentType::class])->group(function () {
     Route::post('/users', [UserController::class, 'store']);
     Route::post('/transactions', [TransactionController::class, 'store']);
     Route::put('/users/{id}', [UserController::class, 'update']);
-    Route::put('/items/{id}', [ItemController::class, 'update']);
-    Route::post('/items', [ItemController::class, 'store']);
-    Route::delete('/items/{id}', [ItemController::class, 'destroy']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
 });
 

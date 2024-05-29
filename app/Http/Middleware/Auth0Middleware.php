@@ -67,7 +67,7 @@ class Auth0Middleware
 
             return $next($request);
         } catch (\Throwable $e) {
-            return response()->json(['error' => 'Unauthorized', 'error message' => $e->getMessage()], 401);
+            return response()->json(['error' => 'Unauthorized, by general catch', 'error message' => $e->getMessage()], 401);
         }
     }
 }
